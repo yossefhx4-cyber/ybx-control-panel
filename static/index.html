@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YOSSEF BUSINESS X CONTROL PANEL</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- شاشة تسجيل الدخول المحمية بثلاثة عناصر تحقق -->
+  <div id="login-screen" class="login-wrapper">
+    <div class="login-card">
+      <div class="brand-badge">YBX</div>
+      <h1>YOSSEF BUSINESS X CONTROL PANEL</h1>
+      <p class="subtitle">لوحة التحكم المركزية لإدارة التراخيص والأكواد والإصدارات (للمدير المصرح له فقط)</p>
+
+      <form id="admin-login-form" autocomplete="off">
+        <div class="form-group">
+          <label for="login-email">البريد الإلكتروني للإدارة</label>
+          <input type="email" id="login-email" required placeholder="أدخل البريد الإلكتروني..." />
+        </div>
+
+        <div class="form-group">
+          <label for="login-pass1">كلمة السر الأولى</label>
+          <input type="password" id="login-pass1" required placeholder="أدخل كلمة السر الأولى..." />
+        </div>
+
+        <div class="form-group">
+          <label for="login-pass2">كلمة السر الثانية (رمز التحقق الإضافي)</label>
+          <input type="password" id="login-pass2" required placeholder="أدخل كلمة السر الثانية..." />
+        </div>
+
+        <div id="login-error" class="alert-error hidden"></div>
+
+        <button type="submit" class="btn btn-primary btn-block">تحقق ودخول إلى لوحة التحكم</button>
+      </form>
+      <div class="login-footer">Secured Triple-Factor Admin Gateway &bull; Developer: Yossef Ahmed</div>
+    </div>
+  </div>
+
+  <!-- لوحة التحكم الرئيسية بعد نجاح التحقق -->
+  <div id="dashboard-screen" class="app-layout hidden">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>YOSSEF BUSINESS X</h2>
+        <span>CONTROL PANEL</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-tab="stats">📊 لوحة الإحصائيات</button>
+        <button class="nav-btn" data-tab="requests">🔔 طلبات التفعيل</button>
+        <button class="nav-btn" data-tab="codes">🔑 إدارة الأكواد (1000+)</button>
+        <button class="nav-btn" data-tab="devices">💻 الأجهزة والتراخيص</button>
+        <button class="nav-btn" data-tab="settings">⚙️ إعدادات البرنامج عن بُعد</button>
+        <button class="nav-btn" data-tab="versions">🚀 إدارة الإصدارات</button>
+        <button class="nav-btn" data-tab="security">🛡️ سجل الإدارة وكلمات السر</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="logout-btn" class="btn btn-danger btn-block">تسجيل الخروج</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <h3 id="page-title">لوحة الإحصائيات العامة</h3>
+        <div class="topbar-actions">
+          <span id="admin-email-badge" class="badge badge-info"></span>
+          <button id="refresh-all-btn" class="btn btn-secondary">تحديث البيانات</button>
+        </div>
+      </header>
+
+      <!-- 1. لوحة الإحصائيات -->
+      <section id="tab-stats" class="tab-panel">
+        <div class="kpi-grid" id="kpi-grid"></div>
+        <div class="two-col">
+          <div class="card">
+            <h4>آخر التفعيلات النشطة</h4>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>الكود</th><th>معرف الجهاز</th><th>تاريخ التفعيل</th><th>تاريخ الانتهاء</th></tr></thead>
+                <tbody id="recent-activations-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <h4>آخر نشاطات الإدارة</h4>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>العملية</th><th>الهدف</th><th>التفاصيل</th><th>الوقت</th></tr></thead>
+                <tbody id="recent-logs-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. طلبات التفعيل -->
+      <section id="tab-requests" class="tab-panel hidden">
+        <div class="card">
+          <div class="card-header">
+            <h4>طلبات تفعيل الاشتراك الواردة من برنامج Windows</h4>
+            <select id="req-status-filter">
+              <option value="">جميع الطلبات</option>
+              <option value="pending" selected>قيد الانتظار (Pending)</option>
+              <option value="approved">تمت الموافقة (Approved)</option>
+              <option value="rejected">مرفوضة (Rejected)</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>كود الاشتراك</th><th>معرف الجهاز HWID</th><th>المستخدم</th>
+                  <th>تاريخ الطلب</th><th>الحالة</th><th>إجراءات الإدارة</th>
+                </tr>
+              </thead>
+              <tbody id="requests-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. إدارة الأكواد -->
+      <section id="tab-codes" class="tab-panel hidden">
+        <div class="card">
+          <div class="card-header wrap">
+            <h4>إدارة أكواد الاشتراك الـ 1000 وتوليد دفعات جديدة</h4>
+            <div class="inline-actions">
+              <input type="text" id="codes-search" placeholder="بحث بالكود أو HWID..." />
+              <select id="codes-status-filter">
+                <option value="">كل الحالات</option>
+                <option value="new">جديد (New)</option>
+                <option value="pending">طلب تفعيل (Pending)</option>
+                <option value="active">مفعّل (Active)</option>
+                <option value="expired">منتهي (Expired)</option>
+                <option value="revoked">ملغي (Revoked)</option>
+              </select>
+              <button id="export-csv-btn" class="btn btn-secondary">تصدير CSV</button>
+              <button id="export-xlsx-btn" class="btn btn-primary">تصدير Excel</button>
+            </div>
+          </div>
+
+          <div class="batch-bar">
+            <span>توليد دفعة أكواد جديدة:</span>
+            <input type="number" id="batch-count" value="50" min="1" max="1000" />
+            <input type="number" id="batch-days" value="365" min="1" max="3650" placeholder="المدة بالأيام" />
+            <button id="generate-batch-btn" class="btn btn-primary">توليد الأكواد الآن</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>كود الاشتراك</th><th>الحالة</th><th>المدة (يوم)</th>
+                  <th>معرف الجهاز</th><th>تاريخ الانتهاء</th><th>تحكم سريع</th>
+                </tr>
+              </thead>
+              <tbody id="codes-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. الأجهزة والتراخيص -->
+      <section id="tab-devices" class="tab-panel hidden">
+        <div class="card">
+          <h4>الأجهزة المفعّلة وإدارة النقل والتجديد والإيقاف</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>كود الترخيص</th><th>معرف الجهاز HWID</th><th>الحالة</th>
+                  <th>تاريخ التفعيل</th><th>تاريخ الانتهاء</th><th>إدارة الترخيص</th>
+                </tr>
+              </thead>
+              <tbody id="devices-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. التحكم في إعدادات البرنامج عن بُعد -->
+      <section id="tab-settings" class="tab-panel hidden">
+        <div class="card">
+          <h4>التحكم في الإعدادات المركزية لبرنامج Windows عن بُعد</h4>
+          <form id="remote-settings-form" class="grid-form">
+            <div class="form-group"><label>اسم البرنامج</label><input id="rs-app_name" /></div>
+            <div class="form-group"><label>رقم الدعم الفني</label><input id="rs-support_phone" /></div>
+            <div class="form-group"><label>رابط الدعم</label><input id="rs-support_url" /></div>
+            <div class="form-group"><label>فترة السماح عند انقطاع الإنترنت (أيام)</label><input id="rs-grace_days" type="number" /></div>
+            <div class="form-group full"><label>رسالة الترحيب</label><input id="rs-welcome_message" /></div>
+            <div class="form-group full"><label>إعلان يظهر داخل البرنامج</label><input id="rs-announcement" /></div>
+            <div class="form-group full"><label>رسالة انتهاء الاشتراك</label><input id="rs-expiry_message" /></div>
+            <div class="form-group full"><label>رسالة الصيانة</label><input id="rs-maintenance_message" /></div>
+            <div class="form-group full">
+              <button type="submit" class="btn btn-primary">حفظ ونشر الإعدادات المركزية</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- 6. إدارة إصدارات البرنامج -->
+      <section id="tab-versions" class="tab-panel hidden">
+        <div class="card">
+          <h4>نشر إصدار جديد من برنامج YOSSEF BUSINESS X</h4>
+          <form id="publish-version-form" class="grid-form">
+            <div class="form-group"><label>رقم الإصدار (مثال: 1.1.0)</label><input id="ver-number" required /></div>
+            <div class="form-group"><label>رابط تحميل ملف التثبيت Setup.exe</label><input id="ver-url" required /></div>
+            <div class="form-group full"><label>وصف التحديث والمميزات الجديدة</label><input id="ver-desc" required /></div>
+            <div class="form-group full"><button type="submit" class="btn btn-primary">نشر التحديث وإشعار المستخدمين</button></div>
+          </form>
+          <div class="table-wrap" style="margin-top: 16px;">
+            <table>
+              <thead><tr><th>الإصدار</th><th>تاريخ النشر</th><th>الوصف</th><th>رابط التحميل</th></tr></thead>
+              <tbody id="versions-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. سجل الإدارة وتغيير كلمات السر -->
+      <section id="tab-security" class="tab-panel hidden">
+        <div class="two-col">
+          <div class="card">
+            <h4>تغيير كلمتي السر (الأولى والثانية)</h4>
+            <form id="change-passwords-form">
+              <div class="form-group"><label>كلمة السر الأولى الحالية</label><input type="password" id="cp-old1" required /></div>
+              <div class="form-group"><label>كلمة السر الثانية الحالية</label><input type="password" id="cp-old2" required /></div>
+              <div class="form-group"><label>كلمة السر الأولى الجديدة</label><input type="password" id="cp-new1" required /></div>
+              <div class="form-group"><label>كلمة السر الثانية الجديدة</label><input type="password" id="cp-new2" required /></div>
+              <button type="submit" class="btn btn-primary">تحديث كلمتي السر</button>
+            </form>
+          </div>
+          <div class="card">
+            <h4>سجل العمليات الإدارية الكامل</h4>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>المدير</th><th>العملية</th><th>التفاصيل</th><th>الوقت</th></tr></thead>
+                <tbody id="full-logs-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/admin.js"></script>
+</body>
+</html>
